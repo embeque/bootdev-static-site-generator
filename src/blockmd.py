@@ -25,7 +25,7 @@ def markdown_to_html_node(markdown: str) -> ParentNode:
             leaf_node = text_node_to_html_node(text_node)
             parent_node = get_parent_node(BlockType.CODE, [leaf_node])
             root_childs.append(parent_node)
-
+# create seperate process for headings
         else:
             block = block.replace('\n', ' ')
             children = text_to_children(block.strip())
