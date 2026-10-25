@@ -18,19 +18,22 @@ class HTMLNode:
         return result.strip()
 
     def __repr__(self) -> str:
-        return f'{self.tag}: {self.value}\n{self.props}\n({self.children})'
+        return f'<{self.tag}: {self.value} -props {self.props} -child ({self.children})>'
 
 
 class LeafNode(HTMLNode):
-    def __init__(self, tag=None, value=None, props=None) -> None:
+    def __init__(self, tag, value, props=None) -> None:
         super().__init__(tag, value, None, props)
 
-    def to_html(self):
+    def to_html(self) -> str:
         if self.value == None:
             raise ValueError('All leaf nodes must have a value')
         elif self.tag == None:
             return self.value
 
+        if self.tag == 'p':
+            return self.value
+        
         before_prop = f'<{self.tag}'
         after_prop = f'>{self.value}</{self.tag}>'
 
@@ -41,7 +44,7 @@ class LeafNode(HTMLNode):
         return before_prop + after_prop
 
     def __repr__(self) -> str:
-        return f'{self.tag}: {self.value}\n{self.props}'
+        return f'<{self.tag}: {self.value} - {self.props}>'
 
 
 class ParentNode(HTMLNode):

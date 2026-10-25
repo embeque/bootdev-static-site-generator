@@ -25,11 +25,11 @@ class TextNode:
         return False
 
     def __repr__(self) -> str:
-        return f'TextNode({self.text}, {self.text_type.value}, {self.url})'
+        return f'<TextNode({self.text}, {self.text_type.value}, {self.url})>'
 
 def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     if text_node.text_type == TextType.PLAINTEXT:
-        return LeafNode(value=text_node.text)
+        return LeafNode('p', text_node.text)
     elif text_node.text_type == TextType.BOLD:
         return LeafNode('b', text_node.text)
     elif text_node.text_type == TextType.ITALIC:
@@ -48,3 +48,13 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
 
     else:
         raise Exception('Not an inline text type')
+
+
+if __name__ == "__main__":
+    result = '''<p>
+This is a paragraph. It can have a lot of text inside tbh.
+<b>This is bold text.</b>
+This is the last sentence.
+</p>'''
+    md = '''This is a paragraph. It can have a lot of text inside tbh. **This is bold text.** This is the last sentence.'''
+    print()
