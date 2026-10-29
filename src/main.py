@@ -22,9 +22,7 @@ def generate_page(from_path, template_path, dest_path):
     template = template.replace('{{ Content }}', html)
 
     with open(dest_path, 'w') as f:
-        f.write(template)
-
-    
+        f.write(template)    
 
 def extract_title(markdown:str) -> str:
     title = re.findall(r'#\s(.*)', markdown)
@@ -48,23 +46,28 @@ def copy_static():
     file_copy(src_path, des_path)
 
 def file_copy(file_path, des_path)-> None:
-    new_file_path, new_des_path = file_path, des_path
-    if os.path.isdir(file_path):
-        files = os.listdir(file_path)
-        for file in files:
-            new_file_path = os.path.join(file_path, file)
-            new_des_path = os.path.join(des_path, file)
-            if not os.path.exists(new_des_path) and os.path.isdir(new_file_path):
-                os.makedirs(new_des_path, exist_ok=True)
-            file_copy(new_file_path, new_des_path)
+    if os.path.isfile(des_path):
+        raise Exception('destination path cannot be a file, must be a folder!')
 
-    shutil.copy2(new_file_path, new_des_path)
-    print(f'file: {file_path}\nis copied to {des_path}\n')
-    
+    if os.path.isfile(file_path):
+        os.makedirs(des_path, exist_ok=True)
+        shutil.copy2(file_path, des_path)
+        print(f'file: {file_path}\nis copied to {des_path}\n')
+        return
+
+    files = os.listdir(file_path)
+    for file in files:
+        new_file_path, new_des_path = file_path, des_path
+        # because after the loop paths are not reverted to the original
+        new_file_path = os.path.join(file_path, file)
+        if os.path.isdir(new_file_path):
+            new_des_path = os.path.join(des_path, file)
+
+        file_copy(new_file_path, new_des_path)
 
 def main():
     copy_static()
-    generate_page('content/index.md', 'template.html', 'public/index.html')
+    # generate_page('content/index.md', 'template.html', 'public/index.html')
     
 
 main()

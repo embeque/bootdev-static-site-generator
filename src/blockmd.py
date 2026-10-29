@@ -25,9 +25,44 @@ def markdown_to_html_node(markdown: str) -> ParentNode:
             leaf_node = text_node_to_html_node(text_node)
             parent_node = get_parent_node(BlockType.CODE, [leaf_node])
             root_childs.append(parent_node)
-# create seperate process for headings
-        else:
+        
+        # create seperate process for headings
+        elif type == BlockType.HEADING:
             block = block.replace('\n', ' ')
+            regex = r'(#*)\s(.*)'
+            pattern = re.findall(regex, block)
+            headc, texte = pattern[0]
+            children = text_to_children(texte.strip())
+            parent = get_parent_node(type, children, len(headc))
+            root_childs.append(parent)
+        elif type == BlockType.QUOTE:
+            regex = r'>\s(.*)'
+            pattern = re.findall(regex, block)
+            text = '\n'.join(pattern)
+            children = text_to_children(text.strip())
+            parent = get_parent_node(type, children)
+            root_childs.append(parent)
+        elif type == BlockType.ORDERED_LIST:
+            regex = r'\d.\s(.*)'
+            pattern = re.findall(regex, block)
+            text = '\n'.join(pattern)
+            children = text_to_children(text.strip())
+            children = list(map(lambda x: ParentNode('li', [x]), children))
+            parent = get_parent_node(type, children)
+            root_childs.append(parent)
+            
+        elif type == BlockType.UNORDERED_LIST:
+            regex = r'-\s(.*)'
+            pattern = re.findall(regex, block)
+            text = '\n'.join(pattern)
+            children = text_to_children(text.strip())
+            children = list(map(lambda x: ParentNode('li', [x]), children))
+            parent = get_parent_node(type, children)
+            root_childs.append(parent)
+            
+
+        else:
+            # block = block.replace('\n', ' ')
             children = text_to_children(block.strip())
             parent = get_parent_node(type, children)
             root_childs.append(parent)
@@ -35,7 +70,7 @@ def markdown_to_html_node(markdown: str) -> ParentNode:
     return ParentNode('div', root_childs)
 
 
-def get_parent_node(type: BlockType, children) -> ParentNode:
+def get_parent_node(type: BlockType, children, head_count=0) -> ParentNode:
     match type:
         case BlockType.CODE:
             return ParentNode('pre', children)
@@ -46,13 +81,7 @@ def get_parent_node(type: BlockType, children) -> ParentNode:
         case BlockType.ORDERED_LIST:
             return ParentNode('ol', children)
         case BlockType.HEADING:
-            count = 0
-            for char in children[0].value[:6]:
-                if char == '#':
-                    count += 1
-                else: 
-                    break
-            return ParentNode(f'h{count}', children)
+            return ParentNode(f'h{head_count}', children)
         case BlockType.QUOTE:
             return ParentNode('blockquote', children)
         
@@ -93,7 +122,7 @@ def text_to_children(block: str) -> list[LeafNode]:
             
 
 def block_to_block_type(block: str) -> BlockType:
-    if block[:2] == '# ':
+    if block.startswith('#'):
         return BlockType.HEADING
     elif block[:4] == '```\n':
         return BlockType.CODE
