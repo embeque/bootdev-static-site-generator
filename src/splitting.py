@@ -77,6 +77,8 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
         if end.text != '':
             result.append(end)
 
+    result = list(filter(lambda x: x.text != '', result))
+    print('split image result', result)
     return result
 
 
@@ -101,6 +103,8 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
         if end.text != '':
             result.append(end)
 
+    result = list(filter(lambda x: x.text != '', result))
+    print('split link result', result)
     return result
 
 

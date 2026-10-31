@@ -31,7 +31,7 @@ class LeafNode(HTMLNode):
         elif self.tag == None:
             return self.value
 
-        if self.tag == 'p':
+        if self.tag == '' or self.tag == 'p':
             return self.value
         
         before_prop = f'<{self.tag}'
@@ -41,7 +41,9 @@ class LeafNode(HTMLNode):
         if props_html != '':
             before_prop += f' {props_html}'
 
-        return before_prop + after_prop
+        html = before_prop + after_prop
+        print(f'Reached leaf node, returning content is: {html}')
+        return html
 
     def __repr__(self) -> str:
         return f'<{self.tag}: {self.value} - {self.props}>'
@@ -57,13 +59,19 @@ class ParentNode(HTMLNode):
             raise ValueError('Parent Node must have a tag')
         if not self.children:
             raise ValueError('Parent Node must have at least one children')
+        
+        if self.tag == '':
+            return None
 
         open_tag = f'<{self.tag}>'
         close_tag = f'</{self.tag}>'
 
+        print(f'for tag {self.tag}, children are: {self.children}')
         content = ''
         for child in self.children:
+            print(f'calling to_html for: tag {self.tag}')
             content += child.to_html()
+            print(f'returned to loopblock of tag {self.tag}')
 
         return open_tag + content + close_tag
 

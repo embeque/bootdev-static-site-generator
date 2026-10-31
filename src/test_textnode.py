@@ -1,5 +1,5 @@
 import unittest
-from textnode import TextNode, TextType, text_node_to_html_node
+from textnode import TextNode, TextType, text_node_to_html_leaf_node
 
 
 class TestTextNode(unittest.TestCase):
@@ -22,25 +22,25 @@ class TestTextNode(unittest.TestCase):
 class TestNodeHtml(unittest.TestCase):
     def test_text(self):
         node = TextNode("This is a text node", TextType.PLAINTEXT)
-        html_node = text_node_to_html_node(node)
+        html_node = text_node_to_html_leaf_node(node)
         # self.assertEqual(html_node.tag, 'p')  # not sure to wrap it in p or not
         self.assertEqual(html_node.value, "This is a text node")
 
     def test_bold(self):
         node = TextNode("This is a bold text node", TextType.BOLD)
-        html_node = text_node_to_html_node(node)
+        html_node = text_node_to_html_leaf_node(node)
         self.assertEqual(html_node.tag, 'b')
         self.assertEqual(html_node.value, "This is a bold text node")
         
     def test_code(self):
         node = TextNode("This is a code node", TextType.CODE)
-        html_node = text_node_to_html_node(node)
+        html_node = text_node_to_html_leaf_node(node)
         self.assertEqual(html_node.tag, 'code')
         self.assertEqual(html_node.value, "This is a code node")
         
     def test_image(self):
         node = TextNode("This is a image node", TextType.IMAGE, 'url/to/image')
-        html_node = text_node_to_html_node(node)
+        html_node = text_node_to_html_leaf_node(node)
         self.assertEqual(html_node.tag, 'img')
         self.assertEqual(html_node.value, "")
         assert(html_node.props != None)
@@ -49,7 +49,7 @@ class TestNodeHtml(unittest.TestCase):
         
     def test_link(self):
         node = TextNode("This is a link node", TextType.LINK, 'url/to/link')
-        html_node = text_node_to_html_node(node)
+        html_node = text_node_to_html_leaf_node(node)
         self.assertEqual(html_node.tag, 'a')
         assert(html_node.props != None)
         self.assertEqual(html_node.value, "This is a link node")
