@@ -31,7 +31,7 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
     if delimiter == '': # don't know why i do that
         return old_nodes
     
-    result = []
+    result:list[TextNode] = []
     for node in old_nodes:
         if node.text_type != TextType.PLAINTEXT:
             result.append(node)
@@ -48,12 +48,23 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
         start = TextNode(text_list.pop(0), TextType.PLAINTEXT)
         end = TextNode(text_list.pop(), TextType.PLAINTEXT)
 
-        inline = TextNode(delimiter.join(text_list), text_type)
-        if inline.text.find(delimiter) != -1:
-            inline = split_nodes_delimiter([inline], delimiter, text_type)
+        inline = []
+        for i in range(len(text_list)):
+            # due to index numbering it is not like normal even/odd
+            if not i%2 != 0: # bold/italic/code
+                inline.append(TextNode(text_list[i], text_type))
+            else:
+                inline.append(TextNode(text_list[i], TextType.PLAINTEXT))
 
-        result.extend([start, inline, end])
+        
+        # # for checking for multiple delimiter seperations
+        # if inline[0].text.find(delimiter) != -1:
+        #     inline[0].text_type = TextType.PLAINTEXT
+        #     inline = split_nodes_delimiter(inline, delimiter, text_type)
 
+        result.extend([start] + inline + [end])
+
+    result = list(filter(lambda x: x.text != '', result))
     return result
 
 def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
@@ -78,7 +89,7 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
             result.append(end)
 
     result = list(filter(lambda x: x.text != '', result))
-    print('split image result', result)
+    # print('split image result', result)
     return result
 
 
@@ -104,7 +115,7 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
             result.append(end)
 
     result = list(filter(lambda x: x.text != '', result))
-    print('split link result', result)
+    # print('split link result', result)
     return result
 
 

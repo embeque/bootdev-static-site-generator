@@ -5,16 +5,34 @@ from dotenv import load_dotenv
 from textnode import TextNode, TextType
 from blockmd import markdown_to_html_node
 
-# def generate_all(from_dir, dest_dir):
-#     assert os.getcwd().endswith('static-site'), 'You are not running script from the root of project. DO IT!'
+def generate_all(from_dir, dest_dir):
+    assert os.getcwd().endswith('static-site'), 'You are not running script from the root of project. DO IT!'
 
-#     for item in os.listdir(from_dir):
-#         if os.path.isfile(item):
-#             print(f'Generating Page for file on {from_dir+'/'+item} to {dest_dir+'/'+item}')
-#             generate_page(os.path.join(from_dir, item), 'template.html', os.path.join(dest_dir, item))
-#         else: # is a dir
-#             generate_all(os.path.join(from_dir, item), os.path.join(dest_dir, item))
+    for item in os.listdir(from_dir):
+        src_file = os.path.join(from_dir, item)
+        if os.path.isfile(src_file) and src_file.endswith('.md'):
+            print(f'Generating Page for file on {from_dir+'/'+item} to {dest_dir+'/'+item}')
+            generate_page(os.path.join(from_dir, item), 'template.html', os.path.join(dest_dir, item))
+        else: # is a dir
+            generate_all(os.path.join(from_dir, item), os.path.join(dest_dir, item))
 
+def create_missing_dirs(path):
+    os.makedirs(path, exist_ok=True)
+
+def remove_filename_from_path(path):
+    if os.path.isdir(path):
+        return path
+    # remove the last part (works only on linux)
+    path_list = path.split('/')
+    path_list.pop()
+    return '/'.join(path_list)
+
+def change_format(path, format):
+    path_list = path.split('/')
+    last = path_list.pop()
+    filename = last.split('.')[0]
+    path_list.append(filename +'.'+ format)
+    return '/'.join(path_list)
 
 def generate_page(from_path, template_path, dest_path):
     assert os.path.exists(from_path), f"from_path: {from_path} doesn't exists. create it or change it!!"
@@ -35,6 +53,12 @@ def generate_page(from_path, template_path, dest_path):
 
     template = template.replace('{{ Title }}', title)
     template = template.replace('{{ Content }}', html_text)
+
+    dest_dir_path = remove_filename_from_path(dest_path)
+    create_missing_dirs(dest_dir_path)
+    # format = template_path.split('.')[1]
+    format = 'html'
+    dest_path = change_format(dest_path, format)
 
     with open(dest_path, 'w') as f:
         f.write(template)        
@@ -65,7 +89,8 @@ def file_copy(file_path, des_path)-> None:
         raise Exception('destination path cannot be a file, must be a folder!')
 
     if os.path.isfile(file_path):
-        os.makedirs(des_path, exist_ok=True)
+        # os.makedirs(des_path, exist_ok=True)
+        create_missing_dirs(des_path)
         shutil.copy2(file_path, des_path)
         print(f'file: {file_path}\nis copied to {des_path}\n')
         return
@@ -82,7 +107,9 @@ def file_copy(file_path, des_path)-> None:
 
 def main():
     copy_static()
-    generate_page('content/index.md', 'template.html', 'public/index.html')
+    # generate_page('content/index.md', 'template.html', 'public/index.html')
+    generate_all('content', 'public')
     
 
 main()
+

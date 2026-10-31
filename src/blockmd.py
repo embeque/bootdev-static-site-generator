@@ -44,8 +44,8 @@ def extract_block_text(block:str, type:BlockType)-> tuple[str, int]:
 
 
 def markdown_to_html_node(markdown: str) -> ParentNode:
-    # debugging
-    print('Markdown text read from file:\n', markdown)
+    # # debugging
+    # print('Markdown text read from file:\n', markdown)
 
     blocks = markdown_to_blocks(markdown)
     
@@ -64,17 +64,15 @@ def markdown_to_html_node(markdown: str) -> ParentNode:
             children = get_children_leaf_node_from_text(main_text, type)
         parent = get_parent_node(type, children, headcount)
 
-        # debugging
-        print(f'\n\nMain_text:\n{main_text}')
-        print(f'parent({type}): {parent}\nchildren:{children}')
+        # # debugging
+        # print(f'\n\nMain_text:\n{main_text}')
+        # print(f'parent({type}): {parent}\nchildren:{children}')
         
         root_childs.append(parent)
 
     # got all root childs
     root = ParentNode('div', root_childs)
     return root
-
-
 
 
 
@@ -205,11 +203,11 @@ def markdown_to_blocks(markdown: str) -> list[str]:
 
     blocks =  [block.strip() for block in markdown.split('\n\n') if block.strip()]
 
-    # for debugging
-    print('\n\n blocked formed from markdown')
-    for i in range(len(blocks)):
-        print(f'Block {i}:\n{blocks[i]}')
-    print('\n all the block ends \n')
+    # # for debugging
+    # print('\n\n blocked formed from markdown')
+    # for i in range(len(blocks)):
+    #     print(f'Block {i}:\n{blocks[i]}')
+    # print('\n all the block ends \n')
 
     return blocks
 
