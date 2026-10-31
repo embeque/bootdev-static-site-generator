@@ -42,7 +42,7 @@ class LeafNode(HTMLNode):
             before_prop += f' {props_html}'
 
         html = before_prop + after_prop
-        print(f'Reached leaf node, returning content is: {html}')
+        # print(f'Reached leaf node, returning content is: {html}')
         return html
 
     def __repr__(self) -> str:
@@ -66,12 +66,12 @@ class ParentNode(HTMLNode):
         open_tag = f'<{self.tag}>'
         close_tag = f'</{self.tag}>'
 
-        print(f'for tag {self.tag}, children are: {self.children}')
+        # print(f'for tag {self.tag}, children are: {self.children}')
         content = ''
         for child in self.children:
-            print(f'calling to_html for: tag {self.tag}')
+            # print(f'calling to_html for: tag {self.tag}')
             content += child.to_html()
-            print(f'returned to loopblock of tag {self.tag}')
+            # print(f'returned to loopblock of tag {self.tag}')
 
         return open_tag + content + close_tag
 

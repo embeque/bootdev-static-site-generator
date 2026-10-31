@@ -1,20 +1,21 @@
 import re
+import sys
 import shutil
 import os
 from dotenv import load_dotenv
 from textnode import TextNode, TextType
 from blockmd import markdown_to_html_node
 
-def generate_all(from_dir, dest_dir):
+def generate_all(from_dir, dest_dir, basepath):
     assert os.getcwd().endswith('static-site'), 'You are not running script from the root of project. DO IT!'
 
     for item in os.listdir(from_dir):
         src_file = os.path.join(from_dir, item)
         if os.path.isfile(src_file) and src_file.endswith('.md'):
             print(f'Generating Page for file on {from_dir+'/'+item} to {dest_dir+'/'+item}')
-            generate_page(os.path.join(from_dir, item), 'template.html', os.path.join(dest_dir, item))
+            generate_page(os.path.join(from_dir, item), 'template.html', os.path.join(dest_dir, item), basepath)
         else: # is a dir
-            generate_all(os.path.join(from_dir, item), os.path.join(dest_dir, item))
+            generate_all(os.path.join(from_dir, item), os.path.join(dest_dir, item), basepath)
 
 def create_missing_dirs(path):
     os.makedirs(path, exist_ok=True)
@@ -34,11 +35,9 @@ def change_format(path, format):
     path_list.append(filename +'.'+ format)
     return '/'.join(path_list)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath:str):
     assert os.path.exists(from_path), f"from_path: {from_path} doesn't exists. create it or change it!!"
     assert os.path.exists(template_path), f"template_path: {template_path} doesn't exists. create it or change it!!"
-
-    print(f'Generating page from {from_path} to {dest_path} using {template_path}')
     
     with open(from_path, 'r') as f:
         markdown = f.read()
@@ -53,6 +52,8 @@ def generate_page(from_path, template_path, dest_path):
 
     template = template.replace('{{ Title }}', title)
     template = template.replace('{{ Content }}', html_text)
+    template = template.replace('href="/', f'href="{basepath}{"/" if not basepath.endswith("/") else ""}')
+    template = template.replace('src="/', f'src="{basepath}{"/" if not basepath.endswith("/") else ""}')
 
     dest_dir_path = remove_filename_from_path(dest_path)
     create_missing_dirs(dest_dir_path)
@@ -60,8 +61,11 @@ def generate_page(from_path, template_path, dest_path):
     format = 'html'
     dest_path = change_format(dest_path, format)
 
+    print(f'Generating page from {from_path} to {dest_path} using {template_path}')
+    
     with open(dest_path, 'w') as f:
         f.write(template)        
+
 
 def extract_title(markdown:str) -> str:
     title = re.findall(r'#\s(.*)', markdown)
@@ -69,18 +73,18 @@ def extract_title(markdown:str) -> str:
         raise Exception('Title of Page not Found')
     return title[0]
 
-def copy_static():
+def copy_static(dest_path):
     assert os.getcwd().endswith('static-site'), 'You are not running script from the root of project. DO IT!'
-    if not os.path.isdir('public/'):
-        print('\'public/\' directory is created')
+    if not os.path.isdir(dest_path):
+        print(f'\'{dest_path}\' directory is created')
     else:
-        shutil.rmtree('public/')
-        print('Everything inside public/ is deleted')
+        shutil.rmtree(dest_path)
+        print(f'Everything inside {dest_path} is deleted')
 
-    os.mkdir('public/')
+    os.mkdir(dest_path)
 
     src_path = os.path.join(os.getcwd(), 'static/')
-    des_path = os.path.join(os.getcwd(), 'public/')
+    des_path = os.path.join(os.getcwd(), dest_path)
 
     file_copy(src_path, des_path)
 
@@ -106,9 +110,12 @@ def file_copy(file_path, des_path)-> None:
         file_copy(new_file_path, new_des_path)
 
 def main():
-    copy_static()
-    # generate_page('content/index.md', 'template.html', 'public/index.html')
-    generate_all('content', 'public')
+    basepath:str = sys.argv[1] if len(sys.argv) > 1 else "/"
+    
+    copy_static('docs/')
+    # generate_page('content/index.md', 'template.html', 'docs/index.html', basepath)
+    os.makedirs('docs', exist_ok=True)
+    generate_all('content', 'docs', basepath)
     
 
 main()
